@@ -1,7 +1,6 @@
 import React from 'react';
-import { X, Trash2, Navigation, Clock } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { Alert } from '../services/alerts';
+import { X, Bell, Trash2, Navigation, AlertTriangle, Info, ShieldAlert } from 'lucide-react';
+import type { Alert } from '../services/alerts';
 
 interface NotificationsDrawerProps {
   isOpen: boolean;
@@ -11,80 +10,108 @@ interface NotificationsDrawerProps {
 }
 
 const NotificationsDrawer: React.FC<NotificationsDrawerProps> = ({ isOpen, onClose, alerts, onClear }) => {
-  const navigate = useNavigate();
-
   return (
     <>
-      {/* Overlay */}
-      <div 
-        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[300] transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-        onClick={onClose}
-      />
-      
+      {/* Backdrop */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] transition-opacity duration-500"
+          onClick={onClose}
+        />
+      )}
+
       {/* Drawer */}
-      <div className={`fixed top-0 right-0 h-full w-full max-w-sm bg-bg-dark border-l border-white/5 z-[301] transition-transform duration-500 transform ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      <aside className={`fixed top-0 right-0 h-full w-full max-w-md bg-bg-dark border-l border-white/5 z-[101] transform transition-transform duration-500 ease-out shadow-2xl ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="p-6 border-b border-white/5 flex justify-between items-center bg-card-dark/50">
-            <div>
-              <h2 className="text-xl font-bold">Notifications</h2>
-              <p className="text-xs text-text-secondary">{alerts.length} updates for this session</p>
+          <div className="p-6 border-b border-white/5 flex items-center justify-between bg-card-dark/50">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Bell className="w-6 h-6 text-primary" />
+                {alerts.length > 0 && (
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-danger rounded-full border-2 border-bg-dark"></span>
+                )}
+              </div>
+              <h2 className="text-xl font-bold">Alert History</h2>
             </div>
-            <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-xl transition-colors">
-              <X className="w-6 h-6" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={onClear}
+                className="p-2 hover:bg-white/5 rounded-xl text-text-secondary transition-colors"
+                title="Clear all"
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
+              <button 
+                onClick={onClose}
+                className="p-2 hover:bg-white/5 rounded-xl text-text-secondary transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
           </div>
 
-          {/* Action Bar */}
-          <div className="px-6 py-3 border-b border-white/5 flex justify-end">
-            <button 
-              onClick={onClear}
-              className="text-xs font-bold text-danger hover:opacity-80 flex items-center gap-2"
-            >
-              <Trash2 className="w-3 h-3" />
-              Clear All
-            </button>
-          </div>
-
-          {/* Alert List */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 no-scrollbar">
             {alerts.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center opacity-30 text-center">
-                <Clock className="w-12 h-12 mb-4" />
-                <p>No alerts in history</p>
+              <div className="h-full flex flex-col items-center justify-center text-center p-10 opacity-40">
+                <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-4">
+                  <Bell className="w-8 h-8" />
+                </div>
+                <p className="text-sm font-bold uppercase tracking-widest">No notifications yet</p>
+                <p className="text-xs mt-2">Real-time alerts will appear here as stadium conditions change.</p>
               </div>
             ) : (
               alerts.map((alert) => (
-                <div 
-                  key={alert.id}
-                  className="bg-card-dark p-4 rounded-2xl border border-white/5 space-y-3 group hover:border-white/20 transition-all"
-                >
-                  <div className="flex justify-between items-start">
-                    <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                <div key={alert.id} className="bg-card-dark p-4 rounded-2xl border border-white/5 group hover:border-primary/30 transition-all">
+                  <div className="flex gap-4">
+                    <div className={`mt-1 w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
                       alert.type === 'critical' ? 'bg-danger/20 text-danger' : 
                       alert.type === 'warning' ? 'bg-warning/20 text-warning' : 
                       'bg-primary/20 text-primary'
                     }`}>
-                      {alert.type}
-                    </span>
-                    <span className="text-[10px] text-text-secondary font-mono">{alert.timestamp}</span>
+                      {alert.type === 'critical' ? <ShieldAlert className="w-5 h-5" /> : 
+                       alert.type === 'warning' ? <AlertTriangle className="w-5 h-5" /> : 
+                       <Info className="w-5 h-5" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start mb-1">
+                        <span className={`text-[10px] font-black uppercase tracking-tighter ${
+                          alert.type === 'critical' ? 'text-danger' : 
+                          alert.type === 'warning' ? 'text-warning' : 
+                          'text-primary'
+                        }`}>
+                          {alert.type} Alert
+                        </span>
+                        <span className="text-[10px] text-text-secondary font-mono">{alert.timestamp}</span>
+                      </div>
+                      <p className="text-sm font-bold text-white leading-snug mb-2">{alert.message}</p>
+                      {alert.suggestion && (
+                        <p className="text-xs text-text-secondary leading-relaxed bg-white/5 p-2 rounded-lg border border-white/5 mb-3 italic">
+                          💡 {alert.suggestion}
+                        </p>
+                      )}
+                      {alert.zoneId && (
+                        <button className="w-full py-2 bg-primary/10 hover:bg-primary text-primary hover:text-white rounded-xl text-[10px] font-black uppercase transition-all flex items-center justify-center gap-2">
+                          <Navigation className="w-3 h-3" />
+                          View Sector
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-sm font-medium leading-relaxed">{alert.message}</p>
-                  {alert.suggestion && <p className="text-xs text-text-secondary italic">{alert.suggestion}</p>}
-                  
-                  <button 
-                    onClick={() => { navigate(`/navigate?zone=${alert.zoneId}`); onClose(); }}
-                    className="w-full py-2 bg-white/5 hover:bg-primary/20 hover:text-primary rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all"
-                  >
-                    <Navigation className="w-3 h-3" />
-                    Navigate
-                  </button>
                 </div>
               ))
             )}
           </div>
+
+          {/* Footer */}
+          <div className="p-6 bg-card-dark/30 border-t border-white/5">
+            <p className="text-[10px] text-text-secondary uppercase font-bold tracking-[0.2em] text-center">
+              Powered by BeatTheCrowd AI
+            </p>
+          </div>
         </div>
-      </div>
+      </aside>
     </>
   );
 };

@@ -1,10 +1,10 @@
 import React from 'react';
-import { ShieldAlert, Navigation, ChevronRight, XOctagon } from 'lucide-react';
+import { ShieldAlert, Navigation, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Zone } from '../services/venueData';
+import type { Zone } from '../services/venueData';
 
 interface EmergencyModeProps {
-  congestedZone: Zone & { id: string };
+  congestedZone: Zone;
   alternatives: (Zone & { id: string })[];
 }
 
@@ -12,59 +12,56 @@ const EmergencyMode: React.FC<EmergencyModeProps> = ({ congestedZone, alternativ
   const navigate = useNavigate();
 
   return (
-    <div className="fixed inset-0 z-[500] bg-[#0F172A]/95 backdrop-blur-md flex items-center justify-center p-6 animate-in fade-in duration-500">
-      <div className="w-full max-w-md bg-card-dark border-2 border-danger rounded-[40px] p-8 shadow-[0_0_100px_rgba(239,68,68,0.4)] relative overflow-hidden animate-in zoom-in-95 duration-500">
-        
-        {/* Pulsing Border Effect */}
-        <div className="absolute inset-0 border-4 border-danger animate-pulse opacity-20 pointer-events-none"></div>
-
-        <div className="flex flex-col items-center text-center space-y-6 relative z-10">
-          <div className="w-20 h-20 bg-danger/20 rounded-3xl flex items-center justify-center animate-bounce">
-            <ShieldAlert className="w-10 h-10 text-danger" />
+    <div className="fixed inset-0 z-[200] bg-danger flex flex-col items-center justify-center p-6 text-white overflow-y-auto pt- safe-top">
+      <div className="w-full max-w-md space-y-8 py-10">
+        <div className="flex flex-col items-center text-center space-y-4">
+          <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
+            <ShieldAlert className="w-12 h-12 text-white" />
           </div>
+          <div className="space-y-1">
+            <h1 className="text-4xl font-black tracking-tighter leading-none">SAFETY ALERT</h1>
+            <p className="text-lg font-bold opacity-90">{congestedZone.name} OVER CAPACITY</p>
+          </div>
+        </div>
 
-          <div>
-            <h2 className="text-3xl font-black text-white tracking-tighter uppercase">Overcrowding Alert</h2>
-            <p className="text-text-secondary mt-2 leading-relaxed">
-              <span className="text-white font-bold">{congestedZone.name}</span> has reached critical capacity. Please follow stadium staff directions.
+        <div className="bg-white/10 backdrop-blur-md rounded-[2.5rem] p-8 border border-white/20 space-y-6">
+          <div className="space-y-2">
+            <h3 className="text-xl font-bold flex items-center gap-2">
+               <ShieldCheck className="w-5 h-5" />
+               Safe Exit Routing
+            </h3>
+            <p className="text-sm opacity-80 leading-relaxed">
+              To ensure fan safety, we have redirected all traffic from {congestedZone.name}. Please proceed to the following low-density sectors immediately:
             </p>
           </div>
 
-          <div className="w-full bg-danger/10 p-5 rounded-3xl border border-danger/30 space-y-4">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-danger">Nearest Safe Exits</p>
-            
+          <div className="space-y-3">
             {alternatives.map((alt) => (
-              <div key={alt.id} className="flex justify-between items-center group">
+              <button 
+                key={alt.id}
+                onClick={() => navigate(`/navigate?zone=${alt.id}`)}
+                className="w-full bg-white text-danger p-5 rounded-3xl flex items-center justify-between group hover:scale-[1.02] transition-all"
+              >
                 <div className="text-left">
-                  <p className="text-sm font-bold text-white">{alt.name}</p>
-                  <p className="text-[10px] text-success font-bold uppercase">{alt.waitTime}m wait • Low Crowd</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest opacity-60">Proceed to</p>
+                  <p className="text-xl font-black">{alt.name}</p>
                 </div>
-                <button 
-                  onClick={() => navigate(`/navigate?zone=${alt.id}`)}
-                  className="p-2 bg-white/5 rounded-xl text-primary hover:bg-primary hover:text-white transition-all"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
+                <div className="w-12 h-12 bg-danger/10 rounded-2xl flex items-center justify-center">
+                  <Navigation className="w-6 h-6 text-danger" />
+                </div>
+              </button>
             ))}
           </div>
 
-          <div className="w-full space-y-3">
-            <button 
-              onClick={() => navigate(`/navigate?zone=${alternatives[0]?.id}`)}
-              className="w-full py-5 bg-primary text-white rounded-3xl font-black text-sm tracking-widest shadow-2xl shadow-primary/30 active:scale-95 transition-all flex items-center justify-center gap-3 uppercase"
-            >
-              <Navigation className="w-5 h-5" />
-              Navigate to {alternatives[0]?.name}
-            </button>
-            <button className="w-full py-4 bg-white/5 text-text-secondary rounded-3xl font-bold text-xs uppercase tracking-widest hover:bg-white/10 transition-all flex items-center justify-center gap-2">
-              <XOctagon className="w-4 h-4" />
-              Show All Stadium Exits
-            </button>
+          <div className="pt-4 border-t border-white/10 flex items-center justify-between text-[10px] font-bold uppercase tracking-widest opacity-60">
+            <span>Live Security Monitoring Active</span>
+            <ArrowRight className="w-4 h-4" />
           </div>
-
-          <p className="text-[10px] text-text-secondary font-bold uppercase italic">Stay calm. Follow stadium staff protocols.</p>
         </div>
+
+        <p className="text-center text-xs font-bold opacity-60 px-6">
+          Please remain calm and follow instructions from stadium stewards nearby.
+        </p>
       </div>
     </div>
   );

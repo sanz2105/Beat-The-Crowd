@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { X, AlertCircle, AlertTriangle, Info, Navigation } from 'lucide-react';
+import React from 'react';
+import { ChevronLeft, ChevronRight, X, Navigation } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Alert } from '../services/alerts';
+import type { Alert } from '../services/alerts';
 
 interface AlertBannerProps {
   alerts: Alert[];
@@ -10,59 +10,59 @@ interface AlertBannerProps {
 
 const AlertBanner: React.FC<AlertBannerProps> = ({ alerts, onDismiss }) => {
   const navigate = useNavigate();
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  // Cycle through alerts if multiple
-  useEffect(() => {
-    if (alerts.length <= 1) return;
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % alerts.length);
-    }, 6000);
-    return () => clearInterval(interval);
-  }, [alerts.length]);
+  const [currentIndex, setCurrentIndex] = React.useState(0);
 
   if (alerts.length === 0) return null;
 
-  const currentAlert = alerts[currentIndex] || alerts[0];
+  const currentAlert = alerts[currentIndex];
 
-  const bgColor = {
-    critical: 'bg-[#EF4444]',
-    warning: 'bg-[#F59E0B]',
-    info: 'bg-[#2563EB]'
-  };
+  const next = () => setCurrentIndex((prev) => (prev + 1) % alerts.length);
+  const prev = () => setCurrentIndex((prev) => (prev - 1 + alerts.length) % alerts.length);
 
   return (
-    <div className={`fixed top-4 left-4 right-4 z-[200] ${bgColor[currentAlert.type]} text-white p-4 rounded-2xl shadow-2xl animate-in slide-in-from-top-full duration-500 flex items-center justify-between gap-4 group`}>
-      <div className="flex items-center gap-3 overflow-hidden">
-        <div className="shrink-0 p-2 bg-white/20 rounded-xl">
-          {currentAlert.type === 'critical' ? <AlertCircle className="w-5 h-5" /> : 
-           currentAlert.type === 'warning' ? <AlertTriangle className="w-5 h-5" /> : 
-           <Info className="w-5 h-5" />}
+    <div className={`fixed top-4 left-4 right-4 z-[90] animate-count-up`}>
+      <div className={`p-4 rounded-2xl shadow-2xl border backdrop-blur-xl flex items-center justify-between gap-4 transition-all duration-500 ${
+        currentAlert.type === 'critical' ? 'bg-danger/10 border-danger/30 text-danger' : 
+        currentAlert.type === 'warning' ? 'bg-warning/10 border-warning/30 text-warning' : 
+        'bg-primary/10 border-primary/30 text-primary'
+      }`}>
+        <div className="flex-1 flex items-center gap-3 overflow-hidden">
+          <div className="shrink-0 animate-pulse">🚨</div>
+          <div className="min-w-0">
+             <p className="text-xs font-bold truncate">{currentAlert.message}</p>
+             {currentAlert.suggestion && (
+               <p className="text-[10px] opacity-80 italic truncate">{currentAlert.suggestion}</p>
+             )}
+          </div>
         </div>
-        <div className="min-w-0">
-          <p className="font-bold text-sm truncate">{currentAlert.message}</p>
-          {currentAlert.suggestion && <p className="text-[10px] opacity-90 truncate">{currentAlert.suggestion}</p>}
+
+        <div className="flex items-center gap-2 shrink-0">
+          {currentAlert.zoneId && (
+            <button 
+              onClick={() => navigate(`/navigate?zone=${currentAlert.zoneId}`)}
+              className="px-3 py-1.5 bg-white/10 rounded-xl text-[10px] font-black uppercase tracking-tighter hover:bg-white/20 transition-all flex items-center gap-1"
+            >
+              <Navigation className="w-3 h-3" />
+              Route
+            </button>
+          )}
+          
+          {alerts.length > 1 && (
+            <div className="flex items-center bg-white/5 rounded-lg border border-white/5 px-1">
+              <button onClick={prev} className="p-1 hover:text-white"><ChevronLeft className="w-4 h-4" /></button>
+              <span className="text-[9px] font-mono w-4 text-center">{currentIndex + 1}</span>
+              <button onClick={next} className="p-1 hover:text-white"><ChevronRight className="w-4 h-4" /></button>
+            </div>
+          )}
+
+          <button 
+            onClick={() => onDismiss(currentAlert.id)}
+            className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       </div>
-
-      <div className="flex items-center gap-2 shrink-0">
-        <button 
-          onClick={() => navigate(`/navigate?zone=${currentAlert.zoneId}`)}
-          className="p-2 bg-white/20 rounded-xl hover:bg-white/30 transition-all opacity-0 group-hover:opacity-100"
-          title="Navigate"
-        >
-          <Navigation className="w-4 h-4" />
-        </button>
-        <button 
-          onClick={() => onDismiss(currentAlert.id)}
-          className="p-2 hover:bg-white/20 rounded-xl transition-all"
-        >
-          <X className="w-4 h-4" />
-        </button>
-      </div>
-
-      {/* Progress bar for auto-dismiss */}
-      <div className="absolute bottom-0 left-0 h-1 bg-white/20 rounded-full transition-all duration-[6000ms] w-0 group-hover:w-full"></div>
     </div>
   );
 };

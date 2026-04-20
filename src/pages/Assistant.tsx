@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Send, Mic, Bot, User, Loader2, Sparkles, ChevronRight } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Send, Bot, Sparkles, MessageSquare } from 'lucide-react';
 import { useVenueData } from '../hooks/useVenueData';
 import { askGemini } from '../services/gemini';
 
 interface Message {
   id: string;
-  role: 'user' | 'assistant';
-  content: string;
+  text: string;
+  sender: 'user' | 'bot';
+  timestamp: Date;
 }
 
 const Assistant: React.FC = () => {
@@ -14,116 +15,117 @@ const Assistant: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    scrollToBottom();
   }, [messages, isTyping]);
 
-  const handleSend = async (text: string) => {
-    if (!text.trim() || !zones) return;
+  const handleSend = async () => {
+    if (!input.trim() || !zones) return;
 
-    const userMsg: Message = { id: Date.now().toString(), role: 'user', content: text };
+    const userMsg: Message = {
+      id: Date.now().toString(),
+      text: input,
+      sender: 'user',
+      timestamp: new Date()
+    };
+
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setIsTyping(true);
 
-    const response = await askGemini(text, zones);
-    
-    const aiMsg: Message = { id: (Date.now() + 1).toString(), role: 'assistant', content: response };
-    setMessages(prev => [...prev, aiMsg]);
-    setIsTyping(false);
+    try {
+      const response = await askGemini(input, zones);
+      const botMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        text: response,
+        sender: 'bot',
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, botMsg]);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   const suggestions = [
-    "🚪 Best gate to enter?",
-    "🍔 Fastest food near me?",
+    "🍔 Shortest food wait?",
     "🚻 Nearest restroom?",
-    "🪑 How to reach my seat?"
+    "🚪 Best entry gate?",
+    "🚶 Least crowded path to B12"
   ];
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] relative">
+    <div className="flex flex-col h-[calc(100vh-10rem)] md:h-[80vh] bg-card-dark rounded-3xl border border-white/5 overflow-hidden shadow-2xl animate-count-up">
       {/* HEADER */}
-      <header className="flex justify-between items-center mb-4 md:mb-8 px-2">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <span className="p-2 bg-primary/20 rounded-xl">🤖</span>
-            BeatTheCrowd AI
-          </h1>
-          <div className="flex items-center gap-2 mt-1 pl-1">
-            <div className="w-2 h-2 rounded-full bg-success animate-pulse"></div>
-            <span className="text-[10px] font-black uppercase tracking-widest text-success">● Live Concierge</span>
+      <div className="p-6 border-b border-white/5 bg-white/5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+            <Bot className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h2 className="font-bold">BeatTheCrowd AI</h2>
+            <div className="flex items-center gap-1.5">
+              <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></div>
+              <span className="text-[10px] text-text-secondary uppercase font-bold tracking-widest">Live Concierge</span>
+            </div>
           </div>
         </div>
-      </header>
+        <Sparkles className="w-5 h-5 text-warning opacity-50" />
+      </div>
 
-      {/* CHAT AREA */}
-      <div 
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto no-scrollbar space-y-6 pb-24 px-2"
-      >
-        {messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center min-h-[60%] text-center space-y-8 animate-in fade-in zoom-in duration-700">
-            {/* Pulsing Orb */}
-            <div className="relative">
-              <div className="absolute inset-0 bg-primary/30 rounded-full blur-3xl animate-pulse"></div>
-              <div className="relative w-40 h-40 rounded-full bg-gradient-to-tr from-primary to-purple-600 flex items-center justify-center shadow-[0_0_50px_rgba(37,99,235,0.4)] border-4 border-white/10 overflow-hidden">
-                <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
-                <Sparkles className="w-16 h-16 text-white animate-bounce" />
-              </div>
+      {/* MESSAGES AREA */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar">
+        {messages.length === 0 && (
+          <div className="h-full flex flex-col items-center justify-center text-center space-y-6">
+            <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center relative">
+               <div className="absolute inset-0 bg-primary rounded-full animate-ping opacity-10"></div>
+               <Bot className="w-12 h-12 text-primary" />
             </div>
-            
-            <div className="space-y-2">
-              <h2 className="text-xl font-bold text-white tracking-tight">Ask me anything about the stadium</h2>
-              <p className="text-sm text-text-secondary">I have real-time access to all 12 zones and wait times.</p>
+            <div>
+              <h3 className="text-xl font-bold">Ask me anything</h3>
+              <p className="text-text-secondary text-sm mt-2 max-w-xs">I have access to real-time stadium data to help you beat the crowd.</p>
             </div>
-
-            {/* Suggestions Grid */}
-            <div className="grid grid-cols-2 gap-3 w-full max-w-sm">
-              {suggestions.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => handleSend(s)}
-                  className="p-4 bg-card-dark border border-white/5 rounded-2xl text-left text-xs font-bold hover:bg-primary/10 hover:border-primary/30 transition-all active:scale-95 flex items-center justify-between group"
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-sm">
+              {suggestions.map(s => (
+                <button 
+                  key={s} 
+                  onClick={() => setInput(s.replace(/[^a-zA-Z0-9 ]/g, "").trim())}
+                  className="p-3 bg-white/5 border border-white/5 rounded-xl text-left text-xs font-bold hover:bg-white/10 hover:border-primary/30 transition-all"
                 >
                   {s}
-                  <ChevronRight className="w-3 h-3 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
                 </button>
               ))}
             </div>
           </div>
-        ) : (
-          messages.map((m) => (
-            <div 
-              key={m.id}
-              className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2 duration-300`}
-            >
-              <div className={`flex gap-3 max-w-[85%] ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border border-white/10 ${
-                  m.role === 'user' ? 'bg-primary' : 'bg-card-dark'
-                }`}>
-                  {m.role === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4 text-primary" />}
-                </div>
-                <div className={`p-4 rounded-2xl text-sm leading-relaxed ${
-                  m.role === 'user' 
-                    ? 'bg-primary text-white rounded-tr-none shadow-lg' 
-                    : 'bg-card-dark text-text-primary rounded-tl-none border border-white/5'
-                }`}>
-                  {m.content}
-                </div>
-              </div>
-            </div>
-          ))
         )}
 
+        {messages.map((msg) => (
+          <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-[85%] p-4 rounded-2xl ${
+              msg.sender === 'user' 
+                ? 'bg-primary text-white rounded-br-none shadow-lg shadow-primary/20' 
+                : 'bg-white/5 border border-white/10 text-text-primary rounded-bl-none'
+            }`}>
+              <p className="text-sm leading-relaxed">{msg.text}</p>
+              <p className={`text-[9px] mt-2 opacity-50 font-mono ${msg.sender === 'user' ? 'text-right' : 'text-left'}`}>
+                {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </p>
+            </div>
+          </div>
+        ))}
+
         {isTyping && (
-          <div className="flex justify-start animate-in fade-in duration-300">
-            <div className="flex gap-3">
-              <div className="w-8 h-8 rounded-full bg-card-dark border border-white/10 flex items-center justify-center">
+          <div className="flex justify-start">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center shrink-0">
                 <Bot className="w-4 h-4 text-primary" />
               </div>
               <div className="bg-card-dark p-4 rounded-2xl rounded-tl-none border border-white/5 flex gap-1 items-center">
@@ -134,26 +136,25 @@ const Assistant: React.FC = () => {
             </div>
           </div>
         )}
+        <div ref={messagesEndRef} />
       </div>
 
-      {/* INPUT BAR */}
-      <div className="absolute bottom-4 left-0 right-0 px-2">
-        <div className="bg-[#1E293B] border border-white/10 rounded-full p-1 flex items-center shadow-2xl focus-within:border-primary/50 transition-all">
-          <button className="p-3 text-text-secondary hover:text-primary transition-colors">
-            <Mic className="w-6 h-6" />
-          </button>
+      {/* INPUT AREA */}
+      <div className="p-6 bg-white/5 border-t border-white/5">
+        <div className="relative group">
+          <MessageSquare className="absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary w-5 h-5" />
           <input 
             type="text" 
-            placeholder="Type a message..."
-            className="flex-1 bg-transparent py-3 px-2 text-sm focus:outline-none"
+            placeholder="Ask about crowds, food, or navigation..."
+            className="w-full bg-bg-dark border border-white/10 rounded-2xl py-4 pl-12 pr-16 focus:outline-none focus:border-primary transition-all"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSend(input)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
           />
           <button 
-            onClick={() => handleSend(input)}
-            className="bg-primary p-3 rounded-full text-white shadow-lg hover:bg-primary/80 active:scale-90 transition-all disabled:opacity-50"
-            disabled={!input.trim() || isTyping}
+            onClick={handleSend}
+            disabled={!input.trim()}
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 bg-primary text-white rounded-xl hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100 transition-all"
           >
             <Send className="w-5 h-5" />
           </button>

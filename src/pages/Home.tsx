@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Bell, Clock, Users, ArrowRight, Utensils, MapPin, DoorOpen, Loader2, ShieldAlert, Zap } from 'lucide-react';
+import { Clock, Users, ArrowRight, Utensils, MapPin, DoorOpen, ShieldAlert } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useVenueData } from '../hooks/useVenueData';
 import { ref, update } from 'firebase/database';
@@ -29,7 +29,7 @@ const Home: React.FC = () => {
 
   const stats = useMemo(() => {
     if (!zones) return null;
-    const zoneList = Object.values(zones);
+    const zoneList = Object.entries(zones).map(([id, z]) => ({ id, ...z }));
     const highCrowdZones = zoneList.filter(z => z.crowdLevel === 'high');
     const openGates = zoneList.filter(z => z.type === 'gate' && z.isOpen).length;
     const avgWait = Math.round(zoneList.reduce((acc, z) => acc + z.waitTime, 0) / zoneList.length);
@@ -114,7 +114,7 @@ const Home: React.FC = () => {
             <ellipse cx="200" cy="150" rx="140" ry="90" fill="rgba(37, 99, 235, 0.05)" stroke="rgba(255,255,255,0.1)" strokeWidth="2" />
             <rect x="140" y="110" width="120" height="80" rx="10" fill="rgba(34, 197, 94, 0.1)" stroke="rgba(34, 197, 94, 0.2)" strokeWidth="1" />
             
-            {zones && Object.entries(zones).map(([id, z], i) => (
+            {zones && Object.entries(zones).map(([id, z]) => (
                <ZoneMarker key={id} cx={getCoords(id).x} cy={getCoords(id).y} zone={z} />
             ))}
           </svg>

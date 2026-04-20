@@ -22,23 +22,22 @@ export default function BottomNav() {
             }`
           }
         >
-          <span className="text-2xl">{tab.icon}</span>
-          <span className="text-[10px] font-bold uppercase tracking-tighter">{tab.name}</span>
-          
-          {/* Active Indicator (Dot) */}
-          <NavLink
-            to={tab.path}
-            end
-            className={({ isActive }) =>
-              `absolute -bottom-1 w-1 h-1 rounded-full bg-primary transition-all duration-300 ${
-                isActive ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
-              }`
-            }
-          />
+          {({ isActive }) => (
+            <>
+              <span className="text-2xl">{tab.icon}</span>
+              <span className="text-[10px] font-bold uppercase tracking-tighter">{tab.name}</span>
+              
+              {/* Active Indicator (Dot) */}
+              <div className={`absolute -bottom-1 w-1 h-1 rounded-full bg-primary transition-all duration-300 ${
+                  isActive ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
+                }`}
+              />
 
-          {/* Active Order Indicator (Orange Dot) */}
-          {tab.name === 'Queues' && (
-            <div className="absolute top-0 right-0 w-2 h-2 bg-orange-500 rounded-full border-2 border-[#1E293B]"></div>
+              {/* Active Order Indicator (Orange Dot) */}
+              {tab.name === 'Queues' && (
+                <div className="absolute top-0 right-0 w-2 h-2 bg-orange-500 rounded-full border-2 border-[#1E293B]"></div>
+              )}
+            </>
           )}
         </NavLink>
       ))}

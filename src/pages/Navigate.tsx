@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Zap, Users, Accessibility, MapPin, Clock, ArrowRight, Loader2, Navigation as NavIcon } from 'lucide-react';
+import { Search, Zap, Users, Accessibility, MapPin, Navigation as NavIcon } from 'lucide-react';
 import { useVenueData } from '../hooks/useVenueData';
 
 type RouteType = 'fastest' | 'leastCrowded' | 'accessible';
@@ -45,7 +45,7 @@ const Navigate: React.FC = () => {
     if (zoneOptions.length > 0 && !selectedZoneId) {
       setSelectedZoneId(zoneOptions[0].id);
     }
-  }, [zoneOptions]);
+  }, [zoneOptions, selectedZoneId]);
 
   const selectedZone = useMemo(() => 
     zoneOptions.find(z => z.id === selectedZoneId) || zoneOptions[0], 
@@ -54,7 +54,7 @@ const Navigate: React.FC = () => {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[80vh]">
-        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }

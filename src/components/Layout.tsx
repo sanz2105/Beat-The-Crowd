@@ -1,9 +1,9 @@
-import { ReactNode, useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, type ReactNode } from 'react';
 import BottomNav from './BottomNav';
-import { Play, Pause, Bug, LayoutDashboard, Menu, X, ShieldAlert } from 'lucide-react';
+import { Play, Pause, LayoutDashboard, ShieldAlert } from 'lucide-react';
 import { startSimulation, stopSimulation } from '../utils/mockSimulator';
 import { useVenueData } from '../hooks/useVenueData';
-import { alertsEngine, Alert } from '../services/alerts';
+import { alertsEngine, type Alert } from '../services/alerts';
 import AlertBanner from './AlertBanner';
 import NotificationsDrawer from './NotificationsDrawer';
 import EmergencyMode from './EmergencyMode';
@@ -16,7 +16,7 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const { zones } = useVenueData();
   const [isSimulating, setIsSimulating] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const isSidebarOpen = true; // Fixed sidebar for admin preview
   
   // Alert System State
   const [activeAlerts, setActiveAlerts] = useState<Alert[]>([]);
@@ -51,7 +51,7 @@ export default function Layout({ children }: LayoutProps) {
         setAlertHistory(prev => [...freshAlerts, ...prev].slice(0, 50));
       }
     }
-  }, [zones]);
+  }, [zones, alertHistory]);
 
   const toggleSimulation = () => {
     if (isSimulating) {
@@ -167,7 +167,7 @@ export default function Layout({ children }: LayoutProps) {
         {/* Bottom Nav Spacer */}
         <div className="h-16 md:hidden pb-safe" />
         
-        <BottomNav hasOrder={false} />
+        <BottomNav />
       </div>
     </div>
   );
