@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useVenueData } from '../hooks/useVenueData';
-import { Users, Clock, AlertTriangle, Shield, CheckCircle, MapPin, ArrowRight, Menu, Bell } from 'lucide-react';
+import { Users, Clock, AlertTriangle, Shield, CheckCircle, ArrowRight, Menu, Bell } from 'lucide-react';
 import { ref, update } from 'firebase/database';
 import { db } from '../services/firebase';
 

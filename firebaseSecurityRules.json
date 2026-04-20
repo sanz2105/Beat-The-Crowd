@@ -1,0 +1,14 @@
+{
+  "rules": {
+    "zones": {
+      ".read": true,
+      ".write": false
+    },
+    "userSessions": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid"
+      }
+    }
+  }
+}

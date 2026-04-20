@@ -11,18 +11,20 @@ export interface Zone {
 }
 
 export const initialZones: Record<string, Zone> = {
-  gate_a:     { name: "Gate A",           type: "gate",       crowdLevel: "medium", waitTime: 8,  isOpen: true,  capacity: 65 },
-  gate_b:     { name: "Gate B",           type: "gate",       crowdLevel: "high",   waitTime: 18, isOpen: true,  capacity: 85 }, // Lowered from 92 to avoid instant emergency
-  gate_c:     { name: "Gate C",           type: "gate",       crowdLevel: "low",    waitTime: 2,  isOpen: true,  capacity: 30 },
-  gate_d:     { name: "Gate D",           type: "gate",       crowdLevel: "low",    waitTime: 0,  isOpen: false, capacity: 10 },
-  food_north: { name: "Food Court North", type: "food",       crowdLevel: "high",   waitTime: 22, isOpen: true,  capacity: 75 }, // Lowered
-  food_south: { name: "Food Court South", type: "food",       crowdLevel: "medium", waitTime: 12, isOpen: true,  capacity: 55 },
-  burger_zone:{ name: "Burger Zone",      type: "food",       crowdLevel: "low",    waitTime: 5,  isOpen: true,  capacity: 20 },
-  pizza_hub:  { name: "Pizza Hub",        type: "food",       crowdLevel: "medium", waitTime: 9,  isOpen: true,  capacity: 48 },
-  rest_east:  { name: "Restrooms East",   type: "restroom",   crowdLevel: "low",    waitTime: 1,  isOpen: true,  capacity: 15 },
-  rest_west:  { name: "Restrooms West",   type: "restroom",   crowdLevel: "medium", waitTime: 6,  isOpen: true,  capacity: 42 },
-  vip_lounge: { name: "VIP Lounge",       type: "lounge",     crowdLevel: "low",    waitTime: 0,  isOpen: true,  capacity: 25 },
-  main_arena: { name: "Main Arena",       type: "arena",      crowdLevel: "medium", waitTime: 0,  isOpen: true,  capacity: 71 }
+  gate_north: { name: "North Gate", type: "gate", crowdLevel: "medium", waitTime: 8, isOpen: true, capacity: 45 },
+  gate_south: { name: "South Gate", type: "gate", crowdLevel: "high", waitTime: 18, isOpen: true, capacity: 82 },
+  gate_east:  { name: "East Gate", type: "gate", crowdLevel: "low", waitTime: 2, isOpen: true, capacity: 25 },
+  gate_west:  { name: "West Gate", type: "gate", crowdLevel: "low", waitTime: 0, isOpen: true, capacity: 15 },
+  section_a:  { name: "Section A", type: "seat", crowdLevel: "medium", waitTime: 0, isOpen: true, capacity: 65 },
+  section_b:  { name: "Section B", type: "seat", crowdLevel: "high", waitTime: 0, isOpen: true, capacity: 88 },
+  section_c:  { name: "Section C", type: "seat", crowdLevel: "low", waitTime: 0, isOpen: true, capacity: 35 },
+  section_d:  { name: "Section D", type: "seat", crowdLevel: "low", waitTime: 0, isOpen: true, capacity: 20 },
+  food_north: { name: "Food Court North", type: "food", crowdLevel: "high", waitTime: 22, isOpen: true, capacity: 78 },
+  food_south: { name: "Food Court South", type: "food", crowdLevel: "medium", waitTime: 12, isOpen: true, capacity: 52 },
+  rest_ne:    { name: "Restrooms NE", type: "restroom", crowdLevel: "low", waitTime: 1, isOpen: true, capacity: 30 },
+  rest_sw:    { name: "Restrooms SW", type: "restroom", crowdLevel: "medium", waitTime: 6, isOpen: true, capacity: 48 },
+  concourse:  { name: "Main Concourse", type: "area", crowdLevel: "medium", waitTime: 0, isOpen: true, capacity: 55 },
+  pitch:      { name: "Field / Pitch", type: "arena", crowdLevel: "low", waitTime: 0, isOpen: true, capacity: 0 }
 };
 
 export const seedVenueData = async () => {
@@ -42,7 +44,6 @@ export const subscribeToZones = (callback: (zones: Record<string, Zone> | null) 
     callback(data);
   }, (error) => {
     console.error("Firebase subscription error:", error);
-    // Explicitly call with null to trigger fallback
     callback(null);
   });
 

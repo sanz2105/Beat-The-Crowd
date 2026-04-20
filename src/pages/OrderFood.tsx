@@ -41,8 +41,9 @@ const OrderFood: React.FC = () => {
     setCart(prev => {
       const newVal = (prev[id] || 0) + delta;
       if (newVal <= 0) {
-        const { [id]: _, ...rest } = prev;
-        return rest;
+        const next = { ...prev };
+        delete next[id];
+        return next;
       }
       return { ...prev, [id]: newVal };
     });
